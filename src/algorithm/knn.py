@@ -22,9 +22,7 @@ print(all_pd_data)
 
 #   * 划分训练集和测试集 （按照Label采用分层抽样，保证训练集和测试集样本均匀）
 from sklearn.model_selection import train_test_split
-x_train, x_test,y_train,y_test = train_test_split(all_pd_data['Cut_Text'],all_pd_data['Label'], 
- 
-                                                 test_size=0.2, stratify=all_pd_data['Label'])
+x_train, x_test,y_train,y_test = train_test_split(all_pd_data['Cut_Text'],all_pd_data['Label'], test_size=0.2, stratify=all_pd_data['Label'])
 # 3、特征工程
 
 from sklearn.feature_extraction.text import TfidfVectorizer
