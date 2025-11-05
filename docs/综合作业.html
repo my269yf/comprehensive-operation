@@ -142,8 +142,57 @@
 <h1 id="基于机器学习的文本分类与聚类分析"><center>基于机器学习的文本分类与聚类分析</center></h1>
 <h2 id="1-实验准备">1. 实验准备</h2>
 <h3 id="11-数据来源">1.1 数据来源</h3>
-<p>数据来源于老师发送的文件&quot;gastric.xlsx&quot;表格。该数据集包含250条胃部病理诊断记录，每条记录包含两个字段：Label（标签）和Text（病理诊断文本描述）。</p>
-<p><img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\gastric_sheet1.png" alt="图片2"></p>
+<p>数据来源于老师发送的文件&quot;gastric.xlsx&quot;表格。该数据集包含250条胃部病理诊断记录，每条记录包含两个字段：Label（标签）和Text（病理诊断文本描述）。以下为10条数据样例：</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Text</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>（胃体小弯活检）粘膜慢性活动性萎缩性炎伴腺体中度肠化及糜烂，局灶腺体粘液样变及低级别上皮内瘤变。<br>（建议随诊、定期复查！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>（胃窦小弯）粘膜慢性活动性炎伴少量出血，另见少量炎性渗出，局灶腺体低级别上皮内瘤变。幽门螺旋杆菌（HP）：（阴性，-）。<br>（建议临床随访！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>慢性轻度萎缩性胃（窦小弯）炎伴腺体轻度肠化及浅表糜烂，局灶腺体低级别上皮内瘤变。幽门螺旋杆菌（HP）：（阴性，-）。<br>（建议临床随访！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1、（胃窦小弯活检）粘膜慢性活动性炎伴浅表糜烂。<br>2、（胃体后壁活检）黏膜慢性炎伴局灶呈息肉样增生。<br>3、（胃窦体交界处大弯活检）粘膜慢性活动性炎伴浅表糜烂，局灶腺体低级别上皮内瘤变。<br>4、（胃体下部大弯活检）粘膜慢性活动性炎伴浅表糜烂，局灶腺体低级别上皮内瘤变。。<br>（建议治疗后复查！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1、（胃角活检）粘膜慢性炎伴轻度肠化及少量出血、糜烂，局灶腺体低级别上皮内瘤变。<br>2、（胃窦小弯活检）粘膜慢性炎伴轻度肠化及少量出血、糜烂。<br>（建议随诊、定期复查！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>慢性活动性萎缩性胃（角小弯）炎伴少量出血及浅表糜烂，局灶腺体低级别上皮内瘤变。幽门螺旋杆菌（HP）：（阳性，+）<br>（建议临床随访！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1、（胃窦小弯活检）慢性活动性萎缩性胃炎伴中度肠化及浅表糜烂，局灶腺体低级别上皮内瘤变。<br>2、（胃窦体交界大弯活检）慢性活动性萎缩性胃炎伴中度肠化。<br>3、（胃体小弯活检）黏膜慢性活动性炎伴中度肠化。<br>（建议肠化分型检查！）（建议定期复查！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>（胃窦后壁活检）粘膜慢性炎伴浅表糜烂，局灶腺体低级别上皮内瘤变。<br>（建议定期复查！）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1、（幽门前区活检）黏膜慢性活动性炎伴局灶糜烂，部分腺体低级别上皮内瘤变。<br>2、（胃角胃体侧活检）黏膜慢性活动性炎伴轻度肠化及局灶糜烂。     <br>（建议治疗后复查）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>（胃窦小弯活检）慢性活动性萎缩性胃炎伴轻度肠化及局灶糜烂，部分腺体低级别上皮内瘤变。幽门螺杆菌（HP）：（阳性，+）。</td>
+</tr>
+</tbody>
+</table>
 <h3 id="12-实验环境与工具">1.2 实验环境与工具</h3>
 <ul>
 <li><strong>编程语言</strong>: Python 3.9.23</li>
@@ -416,9 +465,7 @@ all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data
 
 <span class="hljs-comment">#   * 划分训练集和测试集 （按照Label采用分层抽样，保证训练集和测试集样本均匀）</span>
 <span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
-x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>], 
- 
-                                                 test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
+x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>], test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
 <span class="hljs-comment"># 3、特征工程</span>
 
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
@@ -587,31 +634,13 @@ sil = silhouette_score(x_train, y_pred)
 </code></pre>
 <h2 id="7-实验总结与展望">7. 实验总结与展望</h2>
 <h3 id="71-主要成果">7.1 主要成果</h3>
-<ul>
-<li>成功实现了基于TF-IDF的病理诊断文本特征提取</li>
-<li>完成了KNN和SVM分类器的构建与评估</li>
-<li>实现了K-Means聚类算法并进行了质量评估</li>
-<li>验证了机器学习在医疗文本分析中的可行性</li>
-</ul>
+<p>本次实验，我通过机器学习算法，对一个病理诊断数据集进行分类和聚类，并利用可视化技术绘制了不同算法的图像，用于分析算法的好坏。</p>
 <h3 id="72-技术挑战与解决方案">7.2 技术挑战与解决方案</h3>
-<ul>
-<li><strong>挑战1</strong>: 中文文本处理 - 使用jieba分词和TF-IDF自动处理</li>
-<li><strong>挑战2</strong>: 特征维度控制 - 通过TF-IDF自动选择重要特征</li>
-<li><strong>挑战3</strong>: 模型选择 - 根据任务特点选择分类或聚类算法</li>
-</ul>
-<h3 id="73-应用价值">7.3 应用价值</h3>
-<p>本实验为医疗诊断辅助系统提供了技术基础：</p>
-<ul>
-<li>自动病理诊断分类</li>
-<li>相似病例发现</li>
-<li>医疗文本数据挖掘</li>
-</ul>
+<p>根据图像可知，KNN算法和SVM算法的结果较好，但K-Means算法的结果较差。</p>
 <h3 id="74-未来工作">7.4 未来工作</h3>
 <ul>
-<li>尝试深度学习模型处理医疗文本</li>
-<li>增加更多的特征工程方法</li>
-<li>探索多标签分类问题</li>
-<li>开发可视化交互界面</li>
+<li>继续优化分类算法</li>
+<li>完善K-Means聚类算法</li>
 </ul>
 <hr>
 <p><strong>完成时间：</strong> 2025年11月4日<br>
