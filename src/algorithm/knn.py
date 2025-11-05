@@ -2,11 +2,11 @@
 import pandas as pd
 
 # 1、获取数据
-all_pd_data = pd.read_excel("./gastric.xlsx", engine="openpyxl")
+all_pd_data = pd.read_excel("./data/raw/gastric.xlsx", engine="openpyxl")
 print(all_pd_data)
 
 #   * 加载停用词
-with open("./stop_words.txt", 'r', encoding="utf-8") as f:
+with open("./data/raw/stop_words.txt", 'r', encoding="utf-8") as f:
     stop_words = list(l.strip() for l in f.readlines())
 stop_words.extend(['\n', '（', '）', ' '])  # 由于停用词中没有'\n'和中文的左右括号和空格，所以单独再加上去
 print(stop_words)

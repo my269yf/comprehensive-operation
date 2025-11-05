@@ -18,7 +18,8 @@
 }
 
 </style>
-            
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
 <style>
@@ -189,35 +190,22 @@
 <h3 id="21-数据加载与探索">2.1 数据加载与探索</h3>
 <p>使用pandas库的<code>read_excel()</code>函数加载Excel文件，数据包含250行记录，每行包含Label（数值标签）和Text（中文病理诊断文本）两个字段。</p>
 <h3 id="22-文本预处理">2.2 文本预处理</h3>
-<p>使用jieba分词库对中文病理诊断文本进行分词处理：</p>
-<ul>
-<li><strong>停用词过滤</strong>: 加载自定义停用词表，过滤无关词汇</li>
-<li><strong>特殊字符处理</strong>: 额外过滤换行符、括号、空格等特殊字符</li>
-<li><strong>分词结果</strong>: 将每篇文本转换为以空格分隔的词汇序列</li>
-</ul>
+<p>使用jieba分词库对中文病理诊断文本进行分词处理，加载自定义停用词表，过滤无关词汇，同时额外加上对换行符、括号、空格等特殊字符的过滤。分词结束后将每篇文本转换为以空格分隔的词汇序列。</p>
 <h3 id="23-文本向量化---tf-idf">2.3 文本向量化 - TF-IDF</h3>
-<p>采用scikit-learn的<code>TfidfVectorizer</code>进行文本特征提取：</p>
-<ul>
-<li><strong>特征提取</strong>: 自动处理分词后的文本，构建词汇表</li>
-<li><strong>TF-IDF原理</strong>: 同时考虑词频(TF)和逆文档频率(IDF)，突出重要词汇</li>
-<li><strong>特征维度</strong>: 根据实际词汇数量自动确定特征维度</li>
-</ul>
+<p>采用scikit-learn的<code>TfidfVectorizer</code>进行文本特征提取，首先自动处理分词后的文本，构建词汇表，同时考虑词频(TF)和逆文档频率(IDF)，突出重要词汇。此处不是以常见的“表格”或“数组”形式展示的，而是以稀疏矩阵（sparse matrix）的压缩格式打印出来的，只显示那些非零的元素，以及它们所在的行、列索引和对应的值。因为大多数句子中，绝大多数词语是不会出现的，也就是<code>TF-IDF = 0</code>。如果把整个250×N的矩阵（比如<code>N=1000+</code>）全部打印出来，会有海量0值，既浪费空间又难以阅读。所以<code>scipy.sparse</code>只打印非零元素，突出关键数据。特征维度根据根据实际词汇数量自动确定。</p>
 <h3 id="24-数据集划分">2.4 数据集划分</h3>
-<p>使用<code>train_test_split</code>函数：</p>
-<ul>
-<li><strong>测试集比例</strong>: 20%</li>
-<li><strong>随机种子</strong>: 确保结果可重现</li>
-<li><strong>分层抽样</strong>: 保持训练集和测试集中各类别比例一致</li>
-</ul>
+<p>使用<code>train_test_split</code>函数分层抽样，将数据集的测试集比例划分为20%。</p>
 <h2 id="3-分类算法实验">3. 分类算法实验</h2>
 <h3 id="31-knn分类算法">3.1 KNN分类算法</h3>
 <h4 id="311-算法原理">3.1.1 算法原理</h4>
-<p>K最近邻算法基于实例学习，通过计算样本间的距离进行分类：</p>
-<ul>
-<li><strong>距离度量</strong>: 默认使用欧氏距离</li>
-<li><strong>邻居数量</strong>: k=10</li>
-<li><strong>投票机制</strong>: 根据最近10个邻居的标签进行多数投票</li>
-</ul>
+<p>K最近邻（K-Nearest Neighbors, KNN）算法基于实例学习，通过计算样本间的欧式距离进行分类，n维空间中的欧式距离的通用计算公式如下（A、B为该空间中的任意两点）：</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>d</mi><mo stretchy="false">(</mo><mi mathvariant="bold">A</mi><mo separator="true">,</mo><mi mathvariant="bold">B</mi><mo stretchy="false">)</mo><mo>=</mo><msqrt><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">d(\mathbf{A}, \mathbf{B}) = \sqrt{\sum_{i=1}^{n} (x_i - y_i)^2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathbf">A</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">B</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.1568em;vertical-align:-1.2777em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8791em;"><span class="svg-align" style="top:-5.1168em;"><span class="pstrut" style="height:5.1168em;"></span><span class="mord" style="padding-left:1.056em;"><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6514em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7401em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.8391em;"><span class="pstrut" style="height:5.1168em;"></span><span class="hide-tail" style="min-width:0.742em;height:3.1968em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="3.1968em" viewBox="0 0 400000 3196" preserveAspectRatio="xMinYMin slice"><path d="M702 80H40000040
+H742v3062l-4 4-4 4c-.667.7 -2 1.5-4 2.5s-4.167 1.833-6.5 2.5-5.5 1-9.5 1
+h-12l-28-84c-16.667-52-96.667 -294.333-240-727l-212 -643 -85 170
+c-4-3.333-8.333-7.667-13 -13l-13-13l77-155 77-156c66 199.333 139 419.667
+219 661 l218 661zM702 80H400000v40H742z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span></span></span></span></span></p>
+<p>超参数k值设置为10，根据最近10个邻居的标签进行多数投票（不加权投票，也是KNN算法中最常用的投票方式）。</p>
 <h4 id="312-实现过程">3.1.2 实现过程</h4>
 <p>基于knn.py代码实现：</p>
 <pre><code class="language-python"><span class="hljs-comment"># 创建KNN分类器</span>
@@ -227,12 +215,9 @@ clf.fit(x_train, y_train)
 <span class="hljs-comment"># 预测</span>
 y_predict = clf.predict(x_test)
 </code></pre>
-<ul>
-<li><strong>模型训练</strong>: 使用训练集TF-IDF特征和对应标签</li>
-<li><strong>预测过程</strong>: 对测试集样本计算与训练样本的距离，选择最近邻进行投票</li>
-</ul>
+<p>使用训练集TF-IDF特征和对应标签进行训练，对测试集样本计算与训练样本的距离，选择最近邻算法进行投票，最终预测结果。</p>
 <h4 id="313-性能评估">3.1.3 性能评估</h4>
-<p>使用分类报告(classification_report)评估模型性能：</p>
+<p>使用分类报告(classification_report)评估模型性能，输出以下四个性能指标：</p>
 <ul>
 <li><strong>准确率</strong>: 通过预测结果与真实标签对比计算</li>
 <li><strong>精确率</strong>: 各类别的预测精确度</li>
@@ -369,7 +354,7 @@ y_pred = kmeans.labels_
 </ul>
 <h2 id="5-实验结果可视化">5. 实验结果可视化</h2>
 <h3 id="51-增强版可视化功能">5.1 增强版可视化功能</h3>
-<p>根据自然语言处理综合作业要求，实现了增强版可视化功能，支持：</p>
+<p>根据自然语言处理综合作业要求，本实验我加入了模型性能可视化评估和对比功能，支持：</p>
 <ul>
 <li><strong>多种向量化方法对比</strong>: TF-IDF、Count Vectorizer、Word2Vec</li>
 <li><strong>ROC曲线分析</strong>: 各类别ROC曲线 + 微平均ROC曲线</li>
@@ -445,7 +430,7 @@ all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data
 
 <span class="hljs-comment">#   * 划分训练集和测试集 （按照Label采用分层抽样，保证训练集和测试集样本均匀）</span>
 <span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
-x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>], test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
+x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
 <span class="hljs-comment"># 3、特征工程</span>
 
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
@@ -619,14 +604,14 @@ sil = silhouette_score(x_train, y_pred)
 <p>根据图像可知，KNN算法和SVM算法的结果较好，但K-Means算法的结果较差。</p>
 <h3 id="74-未来工作">7.4 未来工作</h3>
 <ul>
-<li>继续优化分类算法</li>
+<li>继续优化分类算法，例如使用交叉验证调整超参数k的值，达到更好的分类结果。</li>
 <li>完善K-Means聚类算法</li>
 </ul>
 <hr>
 <p><strong>完成时间：</strong> 2025年11月4日<br>
 <strong>备注：</strong> 为了证明本作业的原创性，该项目的所有代码、设计稿、Markdown格式文档等均公开，项目已开源到Github平台。项目作者为圣逸凡，开源协议为GPLv3，可访问<a href="https://github.com/my269yf/comprehensive-operation">项目链接</a>查看源代码。</p>
 
-            
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
             
         </body>
         </html>
