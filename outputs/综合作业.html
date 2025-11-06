@@ -352,7 +352,7 @@ axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].gri
 </code></pre>
 <p><strong>获得的图像如下：</strong></p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\confusion_matrix_knn&svm.svg" alt="KNN与SVM的对比" width="90%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\confusion_matrix_knn&svm.svg" alt="分类算法的混淆矩阵" width="90%">
 </div>
 <h4 id="334-总结">3.3.4 总结</h4>
 <p>总体而言，SVM在保持较高精确率的同时，在召回率和F1分数等综合指标上表现更为均衡，说明其在该数据集上具有更好的泛化能力和分类稳定性，特别是在处理类别不平衡问题方面展现出了明显优势。</p>
@@ -381,9 +381,9 @@ plt.figure(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number
     plt.plot(fpr, tpr, label=<span class="hljs-string">f&#x27;Class <span class="hljs-subst">{clf.classes_[i]}</span> (AUC = <span class="hljs-subst">{auc_score:<span class="hljs-number">.3</span>f}</span>)&#x27;</span>)
 
 plt.plot([<span class="hljs-number">0</span>, <span class="hljs-number">1</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;k--&#x27;</span>, label=<span class="hljs-string">&#x27;Random&#x27;</span>)
-plt.xlabel(<span class="hljs-string">&#x27;False Positive Rate&#x27;</span>)
-plt.ylabel(<span class="hljs-string">&#x27;True Positive Rate&#x27;</span>)
-plt.title(<span class="hljs-string">&#x27;KNN ROC Curves&#x27;</span>)
+plt.xlabel(<span class="hljs-string">&#x27;误判代价&#x27;</span>)
+plt.ylabel(<span class="hljs-string">&#x27;识别能力&#x27;</span>)
+plt.title(<span class="hljs-string">&#x27;KNN算法的ROC曲线&#x27;</span>)
 plt.legend()
 plt.grid(<span class="hljs-literal">True</span>)
 plt.savefig(<span class="hljs-string">&quot;roc.svg&quot;</span>)
@@ -424,9 +424,9 @@ y_pred = kmeans.labels_
 调整兰德指数（ARI）：0.4220
 轮廓系数（Silhouette Score）：0.1487
 </code></pre>
-<p>以下为聚类分布条形图和混淆矩阵：</p>
+<p>以下为聚类分布条形图和混淆矩阵（代码略）：</p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_cluster_and_confusion_matrix_combined.svg" alt="SVM的ROC曲线" width="90%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_cluster_and_confusion_matrix_combined.svg" alt="聚类分布条形图和混淆矩阵" width="90%">
 </div>
 <p>使用多种指标评估聚类效果：
 <strong>兰德指数(ARI)</strong>: 兰德指数（ARI）用于衡量你的聚类结果（比如 K-Means 的标签）与真实标签（Ground Truth）之间的一致性，值越接近 1 表示聚类结果与真实情况越吻合。计算公式如下：</p>
@@ -449,7 +449,7 @@ y_pred = kmeans.labels_
 </code></pre>
 <p>轮廓系数的可视化图像——分布直方图：</p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_silhouette_score_distribution.svg" alt="SVM的ROC曲线" width="80%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_silhouette_score_distribution.svg" alt="轮廓系数分布直方图" width="80%">
 </div>
 <p><strong>簇内平方和</strong>: 簇内平方和是指所有样本到其所属簇中心的距离平方和，计算公式如下：</p>
 <p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>WCSS</mtext><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>∈</mo><msub><mi>C</mi><mi>k</mi></msub></mrow></munder><mi mathvariant="normal">∥</mi><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>c</mi><mi>k</mi></msub><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\text{WCSS} = \sum_{k = 1}^{K} \sum_{x_i \in C_k} \|x_i - c_k\|^2
@@ -490,75 +490,62 @@ W = [v_1, v_2, \dots, v_k]
 </ul>
 <p>本实验中利用主成分分析(PCA)对聚类结果进行降维，以直观展示可视化分析，如图：</p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_pca_distribution.svg" alt="SVM的ROC曲线" width="80%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_pca_distribution.svg" alt="PCA降维散点图" width="80%">
 </div>
 <h3 id="42-聚类结果分析">4.2 聚类结果分析</h3>
-<p>本次KMeans聚类共将样本划分为5个簇（簇标签为0至4）。聚类结果的调整兰德指数（ARI）为0.4220，表明聚类结果与潜在真实分组（如有）之间存在中等程度的相似性，聚类结构与参考标签有一定对应关系，但一致性未达到强相关水平。轮廓系数（Silhouette Score）为0.1487，处于较低范围，说明样本在其所属簇内的紧密程度一般，且簇与簇之间的区分度有限，整体聚类结构的内部凝聚性和分离性较弱，初步推测是由于数据集不适合聚类处理。综合来看，当前聚类结果具有一定的结构特征，但聚类质量仍有提升空间。</p>
+<p>本次KMeans聚类共将样本划分为5个簇（簇标签为0至4）。聚类结果的调整兰德指数（ARI）为0.4220，表明聚类结果与潜在真实分组（如有）之间存在中等程度的相似性，聚类结构与参考标签有一定对应关系，但一致性未达到强相关水平。轮廓系数（Silhouette Score）为0.1487，处于较低范围，说明样本在其所属簇内的紧密程度一般，且簇与簇之间的区分度有限，整体聚类结构的内部凝聚性和分离性较弱，初步推测是由于数据集不适合聚类处理。</p>
 <h2 id="5-实验代码">5. 实验代码</h2>
 <h3 id="51-knn-分类模型源代码">5.1 KNN 分类模型源代码</h3>
-<pre><code class="language-python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span>
-<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<pre><code class="language-python"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
 
 <span class="hljs-comment"># 1、获取数据</span>
 all_pd_data = pd.read_excel(<span class="hljs-string">&quot;./gastric.xlsx&quot;</span>, engine=<span class="hljs-string">&quot;openpyxl&quot;</span>)
 <span class="hljs-built_in">print</span>(all_pd_data)
-
 <span class="hljs-comment">#   * 加载停用词</span>
 <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;./stop_words.txt&quot;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:
     stop_words = <span class="hljs-built_in">list</span>(l.strip() <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> f.readlines())
 stop_words.extend([<span class="hljs-string">&#x27;\n&#x27;</span>, <span class="hljs-string">&#x27;（&#x27;</span>, <span class="hljs-string">&#x27;）&#x27;</span>, <span class="hljs-string">&#x27; &#x27;</span>])
-<span class="hljs-comment"># 由于停用词中没有&#x27;\n&#x27;和中文的左右括号和空格，所以单独再加上去</span>
-
 <span class="hljs-built_in">print</span>(stop_words)
 
 <span class="hljs-comment"># 2、数据预处理</span>
 <span class="hljs-comment">#   * 对中文文本进行分词</span>
-
 <span class="hljs-keyword">import</span> jieba <span class="hljs-keyword">as</span> jb
+<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+
 all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data[<span class="hljs-string">&#x27;Text&#x27;</span>].apply(
     <span class="hljs-keyword">lambda</span> x: <span class="hljs-string">&quot; &quot;</span>.join([w <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(jb.cut(x)) <span class="hljs-keyword">if</span> w <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> stop_words]))
-
 <span class="hljs-built_in">print</span>(all_pd_data)
-
-<span class="hljs-comment">#   * 划分训练集和测试集 （按照Label采用分层抽样，保证训练集和测试集样本均匀）</span>
-<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
 x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],
     all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
 
 <span class="hljs-comment"># 3、特征工程</span>
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
 
-<span class="hljs-comment"># 3.1、求出训练集 tf-idf</span>
-<span class="hljs-comment"># 3.1.1、实例化一个转换器类</span>
 transfer = TfidfVectorizer(stop_words=stop_words)
-<span class="hljs-comment"># 3.1.2、调用 fit_transform</span>
 x_train = transfer.fit_transform(x_train)
 x_test = transfer.transform(x_test)
-<span class="hljs-comment"># 打印特征抽取结果</span>
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;文本特征抽取的结果：\n&quot;</span>, x_train)
-<span class="hljs-comment"># 新版本使用 get_feature_names_out()</span>
 feature_names = transfer.get_feature_names_out()
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;返回特征名字：\n&quot;</span>, feature_names)
 x_train_feature = feature_names.tolist()
 y_train = <span class="hljs-built_in">list</span>(y_train)
 y_test = <span class="hljs-built_in">list</span>(y_test)
-
-<span class="hljs-built_in">print</span>(x_train.shape)  <span class="hljs-comment"># (200, 80)</span>
+<span class="hljs-built_in">print</span>(x_train.shape)
 
 <span class="hljs-comment"># 4、构建KNN模型</span>
 <span class="hljs-keyword">from</span> sklearn.neighbors <span class="hljs-keyword">import</span> KNeighborsClassifier
+
 clf =  KNeighborsClassifier(n_neighbors=<span class="hljs-number">10</span>)
 clf.fit(x_train, y_train) <span class="hljs-comment"># 训练数据</span>
 y_predict = clf.predict(x_test)
 
-<span class="hljs-comment">#5、评估模型</span>
-
+<span class="hljs-comment"># 5、评估模型</span>
 <span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> classification_report
+
 <span class="hljs-built_in">print</span>(classification_report(y_predict, y_test))
 </code></pre>
 <h3 id="52-svm-分类模型源代码">5.2 SVM 分类模型源代码</h3>
-<pre><code class="language-python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span>
-<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<pre><code class="language-python"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
 
 <span class="hljs-comment"># 1、获取数据</span>
 all_pd_data = pd.read_excel(<span class="hljs-string">&quot;./gastric.xlsx&quot;</span>, engine=<span class="hljs-string">&quot;openpyxl&quot;</span>)
@@ -573,14 +560,14 @@ stop_words.extend([<span class="hljs-string">&#x27;\n&#x27;</span>, <span class=
 <span class="hljs-comment"># 2、数据预处理</span>
 <span class="hljs-comment">#   * 对中文文本进行分词</span>
 <span class="hljs-keyword">import</span> jieba <span class="hljs-keyword">as</span> jb
+
 all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data[<span class="hljs-string">&#x27;Text&#x27;</span>].apply(
     <span class="hljs-keyword">lambda</span> x: <span class="hljs-string">&quot; &quot;</span>.join([w <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(jb.cut(x)) <span class="hljs-keyword">if</span> w <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> stop_words])
 )
-
 <span class="hljs-built_in">print</span>(all_pd_data)
 
-<span class="hljs-comment">#   * 划分训练集和测试集（分层抽样，保证比例一致）</span>
 <span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+
 x_train, x_test, y_train, y_test = train_test_split(
     all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],
     all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],
@@ -591,38 +578,31 @@ x_train, x_test, y_train, y_test = train_test_split(
 <span class="hljs-comment"># 3、特征工程</span>
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
 
-<span class="hljs-comment"># 3.1、求出训练集 tf-idf</span>
 transfer = TfidfVectorizer(stop_words=stop_words)
 x_train = transfer.fit_transform(x_train)
 x_test = transfer.transform(x_test)
-
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;文本特征抽取的结果：\n&quot;</span>, x_train)
 feature_names = transfer.get_feature_names_out()
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;返回特征名字：\n&quot;</span>, feature_names)
 x_train_feature = feature_names.tolist()
 y_train = <span class="hljs-built_in">list</span>(y_train)
 y_test = <span class="hljs-built_in">list</span>(y_test)
-
-<span class="hljs-built_in">print</span>(x_train.shape)  <span class="hljs-comment"># 比如 (200, 80)</span>
+<span class="hljs-built_in">print</span>(x_train.shape)
 
 <span class="hljs-comment"># 4、构建SVM模型</span>
 <span class="hljs-keyword">from</span> sklearn.svm <span class="hljs-keyword">import</span> SVC
 
-<span class="hljs-comment">#   * 实例化SVM分类器</span>
-<span class="hljs-comment">#   * kernel=&#x27;linear&#x27; 使用线性核函数，常见还有 &#x27;rbf&#x27;, &#x27;poly&#x27;</span>
 clf = SVC(kernel=<span class="hljs-string">&#x27;linear&#x27;</span>, C=<span class="hljs-number">1.0</span>)
 clf.fit(x_train, y_train)
-
-<span class="hljs-comment">#   * 预测</span>
 y_predict = clf.predict(x_test)
 
 <span class="hljs-comment"># 5、评估模型</span>
 <span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> classification_report
+
 <span class="hljs-built_in">print</span>(classification_report(y_predict, y_test))
 </code></pre>
 <h3 id="53-k-means-聚类模型源代码">5.3 K-Means 聚类模型源代码</h3>
-<pre><code class="language-python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span>
-<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<pre><code class="language-python"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
 
 <span class="hljs-comment"># 1、获取数据</span>
 all_pd_data = pd.read_excel(<span class="hljs-string">&quot;./gastric.xlsx&quot;</span>, engine=<span class="hljs-string">&quot;openpyxl&quot;</span>)
@@ -637,15 +617,14 @@ stop_words.extend([<span class="hljs-string">&#x27;\n&#x27;</span>, <span class=
 <span class="hljs-comment"># 2、数据预处理</span>
 <span class="hljs-comment">#   * 对中文文本进行分词</span>
 <span class="hljs-keyword">import</span> jieba <span class="hljs-keyword">as</span> jb
+
 all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data[<span class="hljs-string">&#x27;Text&#x27;</span>].apply(
     <span class="hljs-keyword">lambda</span> x: <span class="hljs-string">&quot; &quot;</span>.join([w <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> <span class="hljs-built_in">list</span>(jb.cut(x)) <span class="hljs-keyword">if</span> w <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> stop_words])
 )
-
 <span class="hljs-built_in">print</span>(all_pd_data)
 
-<span class="hljs-comment">#   * 注意：KMeans是无监督学习，不需要划分标签</span>
-<span class="hljs-comment">#     但如果你的数据中有 Label，我们可以用来对聚类结果进行对比评估</span>
 <span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+
 x_train, x_test, y_train, y_test = train_test_split(
     all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],
     all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],
@@ -656,22 +635,18 @@ x_train, x_test, y_train, y_test = train_test_split(
 <span class="hljs-comment"># 3、特征工程</span>
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
 
-<span class="hljs-comment"># 3.1、求出 tf-idf 特征</span>
 transfer = TfidfVectorizer(stop_words=stop_words)
 x_train = transfer.fit_transform(x_train)
 x_test = transfer.transform(x_test)
-
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;文本特征抽取的结果：\n&quot;</span>, x_train)
 feature_names = transfer.get_feature_names_out()
 <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;返回特征名字：\n&quot;</span>, feature_names)
 x_train_feature = feature_names.tolist()
-
-<span class="hljs-built_in">print</span>(x_train.shape)  <span class="hljs-comment"># 比如 (200, 80)</span>
+<span class="hljs-built_in">print</span>(x_train.shape)
 
 <span class="hljs-comment"># 4、构建 K-Means 模型</span>
 <span class="hljs-keyword">from</span> sklearn.cluster <span class="hljs-keyword">import</span> KMeans
 
-<span class="hljs-comment">#   * 实例化聚类器，n_clusters 设置为聚类数（通常与类别数相同）</span>
 kmeans = KMeans(n_clusters=<span class="hljs-number">2</span>, random_state=<span class="hljs-number">42</span>, n_init=<span class="hljs-number">10</span>)
 kmeans.fit(x_train)
 
@@ -682,24 +657,16 @@ y_pred = kmeans.labels_
 <span class="hljs-comment"># 5、评估模型（仅在有标签时可用于评估）</span>
 <span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> adjusted_rand_score, silhouette_score
 
-<span class="hljs-comment">#   * ARI 衡量聚类与真实标签的一致性（有标签时）</span>
 ari = adjusted_rand_score(y_train, y_pred)
 <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;调整兰德指数（ARI）：<span class="hljs-subst">{ari:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
-
-<span class="hljs-comment">#   * 轮廓系数 衡量聚类的紧密度和分离度（无监督评价）</span>
 sil = silhouette_score(x_train, y_pred)
 <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;轮廓系数（Silhouette Score）：<span class="hljs-subst">{sil:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
 </code></pre>
 <h2 id="6-实验总结与展望">6. 实验总结与展望</h2>
 <h3 id="61-主要成果">6.1 主要成果</h3>
 <p>本次实验，我通过机器学习算法，对一个病理诊断数据集进行分类和聚类，并利用可视化技术绘制了不同算法的质量评估、性能对比图像，用于分析算法处理的结果。</p>
-<h3 id="62-结果分析">6.2 结果分析</h3>
-<p>根据图像可知，KNN算法和SVM算法的结果较好，且SVM算法的效果更优于KNN算法；但K-Means算法的结果较差。</p>
-<h3 id="63-未来工作">6.3 未来工作</h3>
-<ul>
-<li>继续优化分类算法，例如使用交叉验证调整超参数k的值，达到更好的分类结果</li>
-<li>完善K-Means聚类算法，或者尝试不同的数据集，以达到理想的聚类结果</li>
-</ul>
+<h3 id="62-结果分析与未来工作">6.2 结果分析与未来工作</h3>
+<p>根据图像可知，KNN算法和SVM算法的结果较好，且SVM算法的效果更优于KNN算法；但K-Means算法的结果较差。我需要继续优化分类算法，例如使用交叉验证调整超参数k的值，达到更好的分类结果；并完善K-Means聚类算法，或者尝试不同的数据集，以达到理想的聚类结果。</p>
 <hr>
 <p><strong>完成时间：</strong> 2025年11月6日<br>
 <strong>备注：</strong> 为了证明本作业的原创性，该项目的所有代码、设计稿、Markdown格式文档等均公开，项目已开源到Github平台。项目作者为圣逸凡，开源协议为GPLv3，可访问<a href="https://github.com/my269yf/comprehensive-operation">该链接</a>查看源代码。</p>
