@@ -143,7 +143,7 @@
 <h1 id="基于机器学习的文本分类与聚类分析"><center>基于机器学习的文本分类与聚类分析</center></h1>
 <h2 id="1-实验准备">1. 实验准备</h2>
 <h3 id="11-数据来源">1.1 数据来源</h3>
-<p>数据来源于老师发送的文件&quot;gastric.xlsx&quot;表格。该数据集包含250条胃部病理诊断记录，每条记录包含两个字段：Label（标签）和Text（病理诊断文本描述）。以下为5条数据样例：</p>
+<p>数据来源于老师发送的文件“gastric.xlsx”表格。该数据集包含250条胃部病理诊断记录，每条记录包含两个字段：Label（标签）和Text（病理诊断文本描述）。以下为5条数据样例：</p>
 <table>
 <thead>
 <tr>
@@ -188,16 +188,23 @@
 </ol>
 <h2 id="2-数据预处理与特征工程">2. 数据预处理与特征工程</h2>
 <h3 id="21-数据加载与探索">2.1 数据加载与探索</h3>
-<p>使用pandas库的<code>read_excel()</code>函数加载Excel文件。</p>
+<p>使用pandas库的read_excel()函数加载Excel文件。</p>
 <h3 id="22-文本预处理">2.2 文本预处理</h3>
 <p>使用jieba分词库对中文病理诊断文本进行分词处理，加载自定义停用词表，过滤无关词汇，同时额外加上对换行符、括号、空格等特殊字符的过滤。分词结束后将每篇文本转换为以空格分隔的词汇序列。</p>
-<h3 id="23-文本向量化---tf-idf">2.3 文本向量化 - TF-IDF</h3>
-<p>采用scikit-learn的<code>TfidfVectorizer</code>进行文本特征提取，首先自动处理分词后的文本，构建词汇表，同时考虑词频(TF)和逆文档频率(IDF)，突出重要词汇。此处不是以常见的“表格”或“数组”形式展示的，而是以稀疏矩阵（sparse matrix）的压缩格式打印出来的，只显示那些非零的元素，以及它们所在的行、列索引和对应的值。因为大多数句子中，绝大多数词语是不会出现的，也就是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>F</mi><mo>−</mo><mi>I</mi><mi>D</mi><mi>F</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">TF-IDF = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">TF</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。如果把整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>250</mn><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">250×N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">250</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 的矩阵（比如<code>N=1000+</code>）全部打印出来，会有海量0值，既浪费空间又难以阅读。所以<code>scipy.sparse</code>只打印非零元素，突出关键数据。特征维度根据实际词汇数量自动确定。</p>
+<h3 id="23-文本向量化tf-idf">2.3 文本向量化（TF-IDF）</h3>
+<ul>
+<li>
+<p>词向量是将自然语言中的词语映射为低维稠密向量的技术，不同方法各有特点：One-Hot编码是最简单的词表示方法，每个词为一个高维稀疏向量，但无法表达词义相似性；TF-IDF通过统计词频与逆文档频率衡量词的重要性，但仍是稀疏表示，未捕捉语义信息；Word2Vec（包括CBOW和Skip-Gram模型）通过神经网络学习词的分布式表示，能捕捉语义相似性且向量紧凑，但对多义词处理能力有限；GloVe基于全局词频统计优化词向量，结合了矩阵分解与局部上下文信息，语义表示更稳定；FastText在Word2Vec基础上引入子词（subword）信息，能更好处理未登录词和形态丰富的语言；BERT Embeddings基于Transformer和上下文信息动态生成词向量，能精准反映词在句子中的语义角色，但计算成本较高，适合对语义精度要求极高的任务。不同方法在效率、语义表达能力、是否考虑上下文、以及对未登录词的处理等方面各有优劣，需根据具体任务需求选择合适的词向量方案。</p>
+</li>
+<li>
+<p>本实验采用scikit-learn的TfidfVectorizer进行文本特征提取，首先自动处理分词后的文本，构建词汇表，同时考虑词频（TF）和逆文档频率（IDF），突出重要词汇。此处不是以常见的“表格”或“数组”形式展示的，而是以稀疏矩阵（sparse matrix）的压缩格式打印出来的，只显示那些非零的元素，以及它们所在的行、列索引和对应的值。因为大多数句子中，绝大多数词语是不会出现的，也就是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>F</mi><mo>−</mo><mi>I</mi><mi>D</mi><mi>F</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">TF-IDF = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">TF</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。如果把整个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>250</mn><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">250×N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">250</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span> 的矩阵（比如 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>1000</mn><mo>+</mo></mrow><annotation encoding="application/x-tex">N=1000+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1000</span><span class="mord">+</span></span></span></span>）全部打印出来，会有海量0值，既浪费空间又难以阅读。所以scipy.sparse只打印非零元素，突出关键数据。特征维度根据实际词汇数量自动确定。</p>
+</li>
+</ul>
 <h3 id="24-数据集划分">2.4 数据集划分</h3>
-<p>使用<code>train_test_split</code>函数分层抽样，将数据集的测试集比例划分为20%。</p>
+<p>使用train_test_split函数分层抽样，将数据集的测试集比例划分为20%。</p>
 <h2 id="3-分类算法实验">3. 分类算法实验</h2>
 <h3 id="31-knn分类算法">3.1 KNN分类算法</h3>
-<h4 id="311-算法原理">3.1.1 算法原理</h4>
+<h4 id="311-算法介绍">3.1.1 算法介绍</h4>
 <p>K最近邻（K-Nearest Neighbors, KNN）算法基于实例学习，通过计算样本间的欧式距离进行分类，n维空间中的欧式距离的通用计算公式如下（A、B为该空间中的任意两点）：</p>
 <p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>d</mi><mo stretchy="false">(</mo><mi mathvariant="bold">A</mi><mo separator="true">,</mo><mi mathvariant="bold">B</mi><mo stretchy="false">)</mo><mo>=</mo><msqrt><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">d(\mathbf{A}, \mathbf{B}) = \sqrt{\sum_{i=1}^{n} (x_i - y_i)^2}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathbf">A</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">B</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.1568em;vertical-align:-1.2777em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8791em;"><span class="svg-align" style="top:-5.1168em;"><span class="pstrut" style="height:5.1168em;"></span><span class="mord" style="padding-left:1.056em;"><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.6514em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2777em;"><span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7401em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-3.8391em;"><span class="pstrut" style="height:5.1168em;"></span><span class="hide-tail" style="min-width:0.742em;height:3.1968em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="3.1968em" viewBox="0 0 400000 3196" preserveAspectRatio="xMinYMin slice"><path d="M702 80H40000040
@@ -252,13 +259,8 @@ y_predict = clf.predict(x_test)
 weighted avg       0.85      0.76      0.77        50
 </code></pre>
 <h3 id="32-svm分类算法">3.2 SVM分类算法</h3>
-<h4 id="321-算法原理">3.2.1 算法原理</h4>
-<p>支持向量机通过寻找最优超平面实现分类：</p>
-<ul>
-<li><strong>核函数</strong>: 线性核(linear)，适合文本分类任务</li>
-<li><strong>正则化参数</strong>: C=1.0，控制分类边界的复杂度</li>
-<li><strong>优化目标</strong>: 最大化分类间隔，提高泛化能力</li>
-</ul>
+<h4 id="321-算法介绍">3.2.1 算法介绍</h4>
+<p>SVM（Support Vector Machine，支持向量机）是一种强大的监督学习算法，主要用于分类（也可用于回归），其核心思想是找到一个最优超平面，将不同类别的数据点最大间隔地分开；对于线性不可分的数据，SVM 通过核函数将数据映射到高维空间，从而实现非线性分类；该算法具有出色的泛化能力，尤其在小样本、高维特征场景下表现优异，但对参数选择和计算资源要求较高，适合对精度要求高、数据量适中的分类任务。</p>
 <h4 id="322-实现过程">3.2.2 实现过程</h4>
 <p>基于svm.py代码实现：</p>
 <pre><code class="language-python"><span class="hljs-comment"># 创建SVM分类器</span>
@@ -292,7 +294,7 @@ y_predict = clf.predict(x_test)
 weighted avg       0.86      0.84      0.85        50
 </code></pre>
 <h3 id="33-分类算法对比分析">3.3 分类算法对比分析</h3>
-<p>KNN和SVM的多维度对比：</p>
+<h4 id="331-knn和svm的多维度对比">3.3.1 KNN和SVM的多维度对比：</h4>
 <table>
 <thead>
 <tr>
@@ -317,12 +319,14 @@ weighted avg       0.86      0.84      0.85        50
 </tr>
 </tbody>
 </table>
-<p><strong>KNN算法和SVM算法的性能指标比较的主要代码如下：</strong></p>
-<pre><code class="language-python"><span class="hljs-comment"># 1. 精确率对比</span>
+<h4 id="332-knn算法和svm算法的性能指标比较的部分代码如下">3.3.2 KNN算法和SVM算法的性能指标比较的部分代码如下：</h4>
+<pre><code class="language-python"><span class="hljs-comment"># 精确率对比代码，其余代码省略</span>
 x = np.arange(<span class="hljs-built_in">len</span>(categories))
 width = <span class="hljs-number">0.35</span>
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].bar(x - width/<span class="hljs-number">2</span>, knn_precision, width, label=<span class="hljs-string">&#x27;KNN&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;skyblue&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].bar(x + width/<span class="hljs-number">2</span>, svm_precision, width, label=<span class="hljs-string">&#x27;SVM&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;lightcoral&#x27;</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].bar(x - width/<span class="hljs-number">2</span>, knn_precision,
+    width, label=<span class="hljs-string">&#x27;KNN&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;skyblue&#x27;</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].bar(x + width/<span class="hljs-number">2</span>, svm_precision,
+    width, label=<span class="hljs-string">&#x27;SVM&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;lightcoral&#x27;</span>)
 axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;各类别精确率(Precision)对比&#x27;</span>)
 axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&#x27;类别&#x27;</span>)
 axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&#x27;精确率&#x27;</span>)
@@ -333,63 +337,25 @@ axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].gri
 
 <span class="hljs-comment"># 添加数值标签</span>
 <span class="hljs-keyword">for</span> i, (knn_val, svm_val) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-built_in">zip</span>(knn_precision, svm_precision)):
-    axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].text(i - width/<span class="hljs-number">2</span>, knn_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{knn_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-    axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].text(i + width/<span class="hljs-number">2</span>, svm_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{svm_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-
-<span class="hljs-comment"># 2. 召回率对比</span>
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].bar(x - width/<span class="hljs-number">2</span>, knn_recall, width, label=<span class="hljs-string">&#x27;KNN&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;skyblue&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].bar(x + width/<span class="hljs-number">2</span>, svm_recall, width, label=<span class="hljs-string">&#x27;SVM&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;lightcoral&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">&#x27;各类别召回率(Recall)对比&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&#x27;类别&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&#x27;召回率&#x27;</span>)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_xticks(x)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_xticklabels(categories)
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].legend()
-axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].grid(axis=<span class="hljs-string">&#x27;y&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
-
-<span class="hljs-comment"># 添加数值标签</span>
-<span class="hljs-keyword">for</span> i, (knn_val, svm_val) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-built_in">zip</span>(knn_recall, svm_recall)):
-    axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].text(i - width/<span class="hljs-number">2</span>, knn_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{knn_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-    axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].text(i + width/<span class="hljs-number">2</span>, svm_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{svm_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-
-<span class="hljs-comment"># 3. F1分数对比</span>
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].bar(x - width/<span class="hljs-number">2</span>, knn_f1, width, label=<span class="hljs-string">&#x27;KNN&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;skyblue&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].bar(x + width/<span class="hljs-number">2</span>, svm_f1, width, label=<span class="hljs-string">&#x27;SVM&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;lightcoral&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&#x27;各类别F1-Score对比&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_xlabel(<span class="hljs-string">&#x27;类别&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_ylabel(<span class="hljs-string">&#x27;F1-Score&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_xticks(x)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_xticklabels(categories)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].legend()
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].grid(axis=<span class="hljs-string">&#x27;y&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
-
-<span class="hljs-comment"># 添加数值标签</span>
-<span class="hljs-keyword">for</span> i, (knn_val, svm_val) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-built_in">zip</span>(knn_f1, svm_f1)):
-    axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].text(i - width/<span class="hljs-number">2</span>, knn_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{knn_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-    axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].text(i + width/<span class="hljs-number">2</span>, svm_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{svm_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-
-<span class="hljs-comment"># 4. 整体指标对比</span>
-x_overall = np.arange(<span class="hljs-built_in">len</span>(overall_metrics))
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].bar(x_overall - width/<span class="hljs-number">2</span>, knn_overall, width, label=<span class="hljs-string">&#x27;KNN&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;skyblue&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].bar(x_overall + width/<span class="hljs-number">2</span>, svm_overall, width, label=<span class="hljs-string">&#x27;SVM&#x27;</span>, alpha=<span class="hljs-number">0.8</span>, color=<span class="hljs-string">&#x27;lightcoral&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">&#x27;整体性能指标对比&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_xlabel(<span class="hljs-string">&#x27;指标类型&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_ylabel(<span class="hljs-string">&#x27;分数&#x27;</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_xticks(x_overall)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_xticklabels(overall_metrics, rotation=<span class="hljs-number">45</span>)
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].legend()
-axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].grid(axis=<span class="hljs-string">&#x27;y&#x27;</span>, linestyle=<span class="hljs-string">&#x27;--&#x27;</span>, alpha=<span class="hljs-number">0.7</span>)
-
-<span class="hljs-comment"># 添加数值标签</span>
-<span class="hljs-keyword">for</span> i, (knn_val, svm_val) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-built_in">zip</span>(knn_overall, svm_overall)):
-    axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].text(i - width/<span class="hljs-number">2</span>, knn_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{knn_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
-    axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].text(i + width/<span class="hljs-number">2</span>, svm_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{svm_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>, ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
+    axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].text(i - width/<span class="hljs-number">2</span>, knn_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{knn_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>,
+        ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
+    axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].text(i + width/<span class="hljs-number">2</span>, svm_val + <span class="hljs-number">0.01</span>, <span class="hljs-string">f&#x27;<span class="hljs-subst">{svm_val:<span class="hljs-number">.2</span>f}</span>&#x27;</span>,
+        ha=<span class="hljs-string">&#x27;center&#x27;</span>, va=<span class="hljs-string">&#x27;bottom&#x27;</span>, fontsize=<span class="hljs-number">9</span>)
 </code></pre>
-<p><strong>本实验KNN算法和SVM算法的性能指标比较的可视化图像如下：</strong></p>
+<p><strong>基于以上代码得到的性能指标比较可视化图像如下：</strong></p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\detailed_comparison.svg" alt="KNN与SVM的对比" width="100%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\detailed_comparison.svg" alt="KNN与SVM的对比" width="90%">
 </div>
-<p>根据对比图像可知，SVM算法在该分类任务中整体表现优于KNN算法，准确率达到0.84，较KNN的0.76提升显著。从各类别表现来看，KNN在Class 1和Class 3的精确率方面表现优异（均为1.00），但在召回率上存在明显短板；而SVM在Class 4和Class 5的召回率上达到完美水平（均为1.00），展现出更好的正例识别能力。特别值得注意的是，两种算法在Class 5的精确率都较低（0.40），但SVM通过极高的召回率实现了相对更好的F1分数平衡。总体而言，SVM在保持较高精确率的同时，在召回率和F1分数等综合指标上表现更为均衡，说明其在该数据集上具有更好的泛化能力和分类稳定性，特别是在处理类别不平衡问题方面展现出了明显优势。</p>
+<p>根据对比图像可知，SVM算法在该分类任务中整体表现优于KNN算法，准确率达到0.84，较KNN的0.76提升显著。从各类别表现来看，KNN在Class 1和Class 3的精确率方面表现优异（均为1.00），但在召回率上存在明显短板；而SVM在Class 4和Class 5的召回率上达到完美水平（均为1.00），展现出更好的正例识别能力。特别值得注意的是，两种算法在Class 5的精确率都较低（0.40），但SVM通过极高的召回率实现了相对更好的F1分数平衡。</p>
+<h4 id="333-根据以下代码可以进一步计算出两种算法的混淆矩阵">3.3.3 根据以下代码可以进一步计算出两种算法的混淆矩阵：</h4>
+<pre><code class="language-python">cm = confusion_matrix(y_test, y_predict)
+</code></pre>
+<p><strong>获得的图像如下：</strong></p>
+<div style="text-align: center;">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\confusion_matrix_knn&svm.svg" alt="KNN与SVM的对比" width="90%">
+</div>
+<h4 id="334-总结">3.3.4 总结</h4>
+<p>总体而言，SVM在保持较高精确率的同时，在召回率和F1分数等综合指标上表现更为均衡，说明其在该数据集上具有更好的泛化能力和分类稳定性，特别是在处理类别不平衡问题方面展现出了明显优势。</p>
 <h3 id="34-两种分类算法的roc曲线">3.4 两种分类算法的ROC曲线</h3>
 <p>ROC曲线就是以FPR（误判代价）为横坐标，TPR（识别能力）为纵坐标绘制出的一条曲线。TPR和FPR的计算公式如下：</p>
 <p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>TPR</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mo separator="true">,</mo><mspace width="1em"/><mtext>FPR</mtext><mo>=</mo><mfrac><mrow><mi>F</mi><mi>P</mi></mrow><mrow><mi>F</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{TPR} = \frac{TP}{TP + FN}
@@ -399,7 +365,7 @@ axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].gri
 <p>AUC（ROC曲线下面积）是评估二分类模型性能的核心指标，其值等于模型将正样本排名高于负样本的概率。AUC为1代表模型完美区分正负例，为0.5意味着模型等同于随机猜测，通常AUC大于0.7认为模型有效，越接近1说明模型综合性能越优。这个指标的优势在于能够综合考量模型在所有分类阈值下的表现，且不受类别分布不平衡的影响，是衡量模型排序能力的黄金标准。对AUC值的概率学解释用公式表示如下：</p>
 <p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>AUC</mtext><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>s</mi><mi>c</mi><mi>o</mi><mi>r</mi><msub><mi>e</mi><mrow><mi>p</mi><mi>o</mi><mi>s</mi><mi>i</mi><mi>t</mi><mi>i</mi><mi>v</mi><mi>e</mi></mrow></msub><mo>&gt;</mo><mi>s</mi><mi>c</mi><mi>o</mi><mi>r</mi><msub><mi>e</mi><mrow><mi>n</mi><mi>e</mi><mi>g</mi><mi>a</mi><mi>t</mi><mi>i</mi><mi>v</mi><mi>e</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{AUC} = P(score_{positive} &gt; score_{negative})
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">AUC</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.02778em;">scor</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">os</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">scor</span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span><span class="mord mathnormal mtight">e</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>为了获得ROC图像，我们只需要在算法源代码后面加上以下代码：</p>
+<p>为了获得ROC图像，我们只需要在算法源代码后面加上以下代码（只展示了KNN算法的ROC代码，SVM的省略）：</p>
 <pre><code class="language-python"><span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> roc_curve, auc
 <span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
 
@@ -423,25 +389,15 @@ plt.grid(<span class="hljs-literal">True</span>)
 plt.savefig(<span class="hljs-string">&quot;roc.svg&quot;</span>)
 plt.show()
 </code></pre>
-<p>这样即可绘制KNN算法的ROC曲线，如下：</p>
+<p>可绘制KNN和SVM算法的ROC曲线，如下：</p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\roc-knn.svg" alt="KNN的ROC曲线" width="70%">
-</div>
-<p>同理可绘制出SVM算法的ROC曲线（SVM算法的代码略），如下：</p>
-<div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\roc-svm.svg" alt="SVM的ROC曲线" width="70%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\roc.svg" alt="KNN的ROC曲线" width="90%">
 </div>
 <p>由各类AUC计算结果可知，该KNN算法和SVM算法的宏平均AUC分别为0.9298和0.9462。由此可见，SVM算法的效果更好。</p>
 <h2 id="4-聚类算法实验">4. 聚类算法实验</h2>
 <h3 id="41-k-means聚类算法">4.1 K-Means聚类算法</h3>
-<h4 id="411-算法原理">4.1.1 算法原理</h4>
-<p>K-Means通过迭代将数据点分配到K个簇中：</p>
-<ul>
-<li><strong>簇数量</strong>: k=2（根据数据特点设置）</li>
-<li><strong>初始化</strong>: 默认k-means++，优化初始中心点选择</li>
-<li><strong>最大迭代次数</strong>: 默认300</li>
-<li><strong>收敛条件</strong>: 中心点变化小于容忍度</li>
-</ul>
+<h4 id="411-算法介绍">4.1.1 算法介绍</h4>
+<p>K均值聚类（K-Means Clustering）是一种经典的无监督学习算法，其目标是将一组数据点划分为 K 个簇（Cluster），使得同一簇内的样本相似度高（距离近），不同簇间的样本相似度低（距离远）；算法通过迭代优化的方式，先随机初始化 K 个质心，然后将每个样本分配到距离最近的质心所在的簇，并更新质心位置，直到质心不再明显变化或达到最大迭代次数；K-Means 简单高效，适用于大规模数据集的数据分组、模式发现和数据压缩等任务，但对初始质心敏感、需要预先指定 K 值、且对异常值和簇的形状较为敏感。</p>
 <h4 id="412-实现过程">4.1.2 实现过程</h4>
 <p>基于kmeans.py代码实现：</p>
 <pre><code class="language-python"><span class="hljs-comment"># 创建K-Means聚类器</span>
@@ -470,16 +426,16 @@ y_pred = kmeans.labels_
 </code></pre>
 <p>以下为聚类分布条形图和混淆矩阵：</p>
 <div style="text-align: center;">
-  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_cluster_and_confusion_matrix_combined.svg" alt="SVM的ROC曲线" width="100%">
+  <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_cluster_and_confusion_matrix_combined.svg" alt="SVM的ROC曲线" width="90%">
 </div>
 <p>使用多种指标评估聚类效果：
 <strong>兰德指数(ARI)</strong>: 兰德指数（ARI）用于衡量你的聚类结果（比如 K-Means 的标签）与真实标签（Ground Truth）之间的一致性，值越接近 1 表示聚类结果与真实情况越吻合。计算公式如下：</p>
 <p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>ARI</mtext><mo>=</mo><mfrac><mrow><mo stretchy="false">(</mo><mtext>实际一致的对数</mtext><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mtext>期望一致的对数</mtext><mo stretchy="false">)</mo></mrow><mrow><mo stretchy="false">(</mo><mtext>最大可能一致的对数</mtext><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mtext>期望一致的对数</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{ARI} = \frac{(实际一致的对数) - (期望一致的对数)}{(最大可能一致的对数) - (期望一致的对数)}
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">ARI</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord cjk_fallback">最大可能一致的对数</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">期望一致的对数</span><span class="mclose">)</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord cjk_fallback">实际一致的对数</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mopen">(</span><span class="mord cjk_fallback">期望一致的对数</span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
-<p>在Python中调用sklearn.metrics库，用一行代码即可计算ARI值：</p>
+<p>在Python中调用sklearn.metrics库，利用以下即可计算ARI值：</p>
 <pre><code class="language-python">ari = adjusted_rand_score(true_labels, kmeans_labels)
 </code></pre>
-<p>由输出结果可知，本次聚类的ARI约为0.42，聚类质量偏中低等，并不理想。初步推测是由于数据集不适合聚类处理。然而我在其他同学的文档中发现了处理结果较好的ROC曲线，由于ROC是用于有监督的分类任务的评估工具，而K-Means是无监督学习算法，它不涉及“真实标签”，也没有“预测类别”的概念，所以这里应该是错误的。</p>
+<p>由输出结果可知，本次聚类的ARI约为0.42，聚类质量偏中低等，并不理想。</p>
 <p><strong>轮廓系数</strong>: 轮廓系数用于评估聚类结果本身的质量，是一种不需要真实标签的无监督评估，它衡量的是：</p>
 <ul>
 <li>每个样本与其所属簇内其他样本的相似度（紧密度）</li>
@@ -518,10 +474,10 @@ PCA（主成分分析）是一种降维方法，用于将高维数据转换为�
 <li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\lambda_k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">λ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：第 k 个主成分的方差（特征值）</li>
 </ul>
 <p>(3) 选择前 k 个主成分，降维投影</p>
-<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Z</mi><mo>=</mo><mi>X</mi><mi>W</mi><mspace width="1em"/><mtext>其中</mtext><mspace width="1em"/><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><msub><mi>v</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>v</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>v</mi><mi>k</mi></msub><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Z = X W
-\quad \text{其中} \quad
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Z</mi><mo>=</mo><mi>X</mi><mi>W</mi><mo separator="true">,</mo><mspace width="1em"/><mtext>其中</mtext><mspace width="1em"/><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><msub><mi>v</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>v</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>v</mi><mi>k</mi></msub><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">Z = X W,
+\quad \text{其中}\quad
 W = [v_1, v_2, \dots, v_k]
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:1em;"></span><span class="mord text"><span class="mord cjk_fallback">其中</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span></span></p>
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mpunct">,</span><span class="mspace" style="margin-right:1em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord cjk_fallback">其中</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">]</span></span></span></span></span></p>
 <ul>
 <li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi></mrow><annotation encoding="application/x-tex">Z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span></span></span></span>：降维后的数据（主成分得分）</li>
 <li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi></mrow><annotation encoding="application/x-tex">W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span></span></span></span>：前 k 个主成分方向组成的矩阵</li>
@@ -537,12 +493,7 @@ W = [v_1, v_2, \dots, v_k]
   <img src="file:///d:\CODE\temp-repo\comprehensive-operation\docs\images\kmeans_pca_distribution.svg" alt="SVM的ROC曲线" width="80%">
 </div>
 <h3 id="42-聚类结果分析">4.2 聚类结果分析</h3>
-<p>成功将病理诊断文本分为2个簇：</p>
-<ul>
-<li><strong>簇分布</strong>: 分析各簇的样本数量和分布特征</li>
-<li><strong>簇特征</strong>: 通过TF-IDF权重分析各簇的关键词汇</li>
-<li><strong>临床应用</strong>: 探索聚类结果在病理诊断中的潜在意义</li>
-</ul>
+<p>本次KMeans聚类共将样本划分为5个簇（簇标签为0至4）。聚类结果的调整兰德指数（ARI）为0.4220，表明聚类结果与潜在真实分组（如有）之间存在中等程度的相似性，聚类结构与参考标签有一定对应关系，但一致性未达到强相关水平。轮廓系数（Silhouette Score）为0.1487，处于较低范围，说明样本在其所属簇内的紧密程度一般，且簇与簇之间的区分度有限，整体聚类结构的内部凝聚性和分离性较弱，初步推测是由于数据集不适合聚类处理。综合来看，当前聚类结果具有一定的结构特征，但聚类质量仍有提升空间。</p>
 <h2 id="5-实验代码">5. 实验代码</h2>
 <h3 id="51-knn-分类模型源代码">5.1 KNN 分类模型源代码</h3>
 <pre><code class="language-python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span>
@@ -555,7 +506,9 @@ all_pd_data = pd.read_excel(<span class="hljs-string">&quot;./gastric.xlsx&quot;
 <span class="hljs-comment">#   * 加载停用词</span>
 <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;./stop_words.txt&quot;</span>, <span class="hljs-string">&#x27;r&#x27;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:
     stop_words = <span class="hljs-built_in">list</span>(l.strip() <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> f.readlines())
-stop_words.extend([<span class="hljs-string">&#x27;\n&#x27;</span>, <span class="hljs-string">&#x27;（&#x27;</span>, <span class="hljs-string">&#x27;）&#x27;</span>, <span class="hljs-string">&#x27; &#x27;</span>])  <span class="hljs-comment"># 由于停用词中没有&#x27;\n&#x27;和中文的左右括号和空格，所以单独再加上去</span>
+stop_words.extend([<span class="hljs-string">&#x27;\n&#x27;</span>, <span class="hljs-string">&#x27;（&#x27;</span>, <span class="hljs-string">&#x27;）&#x27;</span>, <span class="hljs-string">&#x27; &#x27;</span>])
+<span class="hljs-comment"># 由于停用词中没有&#x27;\n&#x27;和中文的左右括号和空格，所以单独再加上去</span>
+
 <span class="hljs-built_in">print</span>(stop_words)
 
 <span class="hljs-comment"># 2、数据预处理</span>
@@ -569,9 +522,10 @@ all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>] = all_pd_data
 
 <span class="hljs-comment">#   * 划分训练集和测试集 （按照Label采用分层抽样，保证训练集和测试集样本均匀）</span>
 <span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
-x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
-<span class="hljs-comment"># 3、特征工程</span>
+x_train, x_test,y_train,y_test = train_test_split(all_pd_data[<span class="hljs-string">&#x27;Cut_Text&#x27;</span>],
+    all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>],test_size=<span class="hljs-number">0.2</span>, stratify=all_pd_data[<span class="hljs-string">&#x27;Label&#x27;</span>])
 
+<span class="hljs-comment"># 3、特征工程</span>
 <span class="hljs-keyword">from</span> sklearn.feature_extraction.text <span class="hljs-keyword">import</span> TfidfVectorizer
 
 <span class="hljs-comment"># 3.1、求出训练集 tf-idf</span>
@@ -747,8 +701,8 @@ sil = silhouette_score(x_train, y_pred)
 <li>完善K-Means聚类算法，或者尝试不同的数据集，以达到理想的聚类结果</li>
 </ul>
 <hr>
-<p><strong>完成时间：</strong> 2025年11月4日<br>
-<strong>备注：</strong> 为了证明本作业的原创性，该项目的所有代码、设计稿、Markdown格式文档等均公开，项目已开源到Github平台。项目作者为圣逸凡，开源协议为GPLv3，可访问<a href="https://github.com/my269yf/comprehensive-operation">项目链接</a>查看源代码。</p>
+<p><strong>完成时间：</strong> 2025年11月6日<br>
+<strong>备注：</strong> 为了证明本作业的原创性，该项目的所有代码、设计稿、Markdown格式文档等均公开，项目已开源到Github平台。项目作者为圣逸凡，开源协议为GPLv3，可访问<a href="https://github.com/my269yf/comprehensive-operation">该链接</a>查看源代码。</p>
 
             <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
             

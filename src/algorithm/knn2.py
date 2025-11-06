@@ -8,6 +8,8 @@ from sklearn.metrics import classification_report
 import numpy as np
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 # 设置中文字体
 try:
@@ -69,4 +71,19 @@ plt.title('KNN算法的ROC曲线')
 plt.legend()
 plt.grid(True)
 plt.savefig("roc-knn.svg")
+plt.show()
+
+# 计算混淆矩阵
+cm = confusion_matrix(y_test, y_predict)
+
+# 绘制热力图形式的混淆矩阵
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+            xticklabels=clf.classes_, 
+            yticklabels=clf.classes_)
+plt.xlabel('预测标签')
+plt.ylabel('真实标签')
+plt.title('混淆矩阵（KNN）')
+plt.tight_layout()  # 防止标签重叠
+plt.savefig('confusion_matrix_knn.svg')  # 保存混淆矩阵图
 plt.show()

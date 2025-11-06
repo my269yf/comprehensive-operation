@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 # 设置中文字体
 try:
@@ -114,3 +116,18 @@ plt.show()
 
 print("ROC曲线绘制完成！")
 print(f"模型包含 {len(clf.classes_)} 个类别: {clf.classes_}")
+
+# 计算混淆矩阵（真实标签 vs 预测标签）
+cm = confusion_matrix(y_test, y_predict)
+
+# 绘制混淆矩阵热力图
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+            xticklabels=clf.classes_, 
+            yticklabels=clf.classes_)
+plt.xlabel('预测标签')
+plt.ylabel('真实标签')
+plt.title('混淆矩阵（SVM）')
+plt.tight_layout()  # 防止标签重叠
+plt.savefig('confusion_matrix_svm.svg')  # 保存为 svg 文件（可改为 png 等）
+plt.show()
