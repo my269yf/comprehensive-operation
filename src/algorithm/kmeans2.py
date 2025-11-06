@@ -33,7 +33,7 @@ all_pd_data['Cut_Text'] = all_pd_data['Text'].apply(
 print(all_pd_data)
 
 #   * 注意：KMeans是无监督学习，不需要划分标签
-#     但如果你的数据中有 Label，我们可以用来对聚类结果进行对比评估
+#     但如果数据中有 Label，我们可以用来对聚类结果进行对比评估
 from sklearn.model_selection import train_test_split
 x_train, x_test, y_train, y_test = train_test_split(
     all_pd_data['Cut_Text'],
@@ -61,7 +61,7 @@ print(x_train.shape)  # 比如 (200, 80)
 from sklearn.cluster import KMeans
 
 #   * 实例化聚类器，n_clusters 设置为聚类数（通常与类别数相同）
-kmeans = KMeans(n_clusters=3, random_state=43, n_init=50)
+kmeans = KMeans(n_clusters=5, random_state=43, n_init=50)
 kmeans.fit(x_train)
 
 #   * 获取聚类结果
@@ -79,15 +79,32 @@ print(f"调整兰德指数（ARI）：{ari:.4f}")
 sil = silhouette_score(x_train, y_pred)
 print(f"轮廓系数（Silhouette Score）：{sil:.4f}")
 
-# ===== 1. 聚类分布条形图 =====
-plt.figure(figsize=(6, 4))
+# ===== 1 & 3. 合并：聚类分布条形图 + 混淆矩阵（放在同一张图上，1行2列） =====
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))  # 1行2列，总宽12英寸，高4英寸
+
+# ---- 子图 0：聚类分布条形图 ----
 cluster_counts = pd.Series(y_pred).value_counts().sort_index()
-plt.bar(cluster_counts.index, cluster_counts.values)
-plt.xticks(cluster_counts.index, [f'Cluster {i}' for i in cluster_counts.index])
-plt.xlabel('Cluster')
-plt.ylabel('样本数量')
-plt.title('聚类分布条形图')
-plt.show()
+axes[0].bar(cluster_counts.index, cluster_counts.values)
+axes[0].set_xticks(cluster_counts.index)
+axes[0].set_xticklabels([f'Cluster {i}' for i in cluster_counts.index])
+axes[0].set_xlabel('Cluster')
+axes[0].set_ylabel('样本数量')
+axes[0].set_title('聚类分布条形图')
+
+# ---- 子图 1：混淆矩阵 ----
+cm = confusion_matrix(y_train, y_pred)
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=np.unique(y_pred),
+            yticklabels=np.unique(y_train),
+            ax=axes[1])  # 重要：指定在第二个子图上绘制
+axes[1].set_xlabel('聚类标签')
+axes[1].set_ylabel('真实标签')
+axes[1].set_title('混淆矩阵（聚类 vs 真实标签）')
+
+# ---- 保存整张图（包含两个子图）----
+plt.tight_layout()  # 避免子图重叠
+plt.savefig('kmeans_cluster_and_confusion_matrix_combined.svg')  # 保存为一张图
+plt.show()  # 显示
 
 # ===== 2. 轮廓系数分布直方图（所有样本） =====
 plt.figure(figsize=(6, 4))
@@ -95,17 +112,7 @@ sns.histplot(silhouette_samples(x_train, y_pred), bins=20, kde=False)
 plt.xlabel('轮廓系数')
 plt.ylabel('样本数量')
 plt.title('轮廓系数分布直方图')
-plt.show()
-
-# ===== 3. 混淆矩阵（聚类结果 vs 真实标签）=====
-plt.figure(figsize=(6, 4))
-cm = confusion_matrix(y_train, y_pred)
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-            xticklabels=np.unique(y_pred), 
-            yticklabels=np.unique(y_train))
-plt.xlabel('聚类标签')
-plt.ylabel('真实标签')
-plt.title('混淆矩阵（聚类 vs 真实标签）')
+plt.savefig('kmeans_silhouette_score_distribution.svg')
 plt.show()
 
 # ===== 4. PCA降维散点图（2D可视化聚类）=====
@@ -123,4 +130,5 @@ plt.colorbar(scatter, label='聚类标签')
 plt.xlabel('主成分 1 (PCA1)')
 plt.ylabel('主成分 2 (PCA2)')
 plt.title('PCA降维散点图（按聚类着色）')
+plt.savefig('kmeans_pca_distribution.svg')
 plt.show()

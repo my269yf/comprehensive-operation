@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+import numpy as np
+
+# 设置中文字体
+try:
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False    # 用来正常显示负号
+except:
+    print("注意：中文字体设置可能有问题")
+
 # 1、获取数据
 all_pd_data = pd.read_excel("./data/raw/gastric.xlsx", engine="openpyxl")
 print(all_pd_data)
@@ -63,10 +74,6 @@ print(classification_report(y_predict, y_test))
 
 # ============ 新增的ROC曲线绘制代码 ============
 
-import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve, auc
-import numpy as np
-
 # 获取预测概率（关键步骤）
 y_predict_proba = clf.predict_proba(x_test)
 
@@ -94,9 +101,9 @@ plt.plot([0, 1], [0, 1], 'k--', linewidth=1, label='Random Classifier')
 # 设置图表属性
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('SVM ROC Curves')
+plt.xlabel('误判代价')
+plt.ylabel('识别能力')
+plt.title('SVM算法的ROC曲线')
 plt.legend()
 plt.grid(True, alpha=0.3)
 

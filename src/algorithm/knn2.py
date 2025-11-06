@@ -6,6 +6,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
 import numpy as np
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
 
 # 设置中文字体
 try:
@@ -48,8 +50,6 @@ y_predict = clf.predict(x_test)
 print(classification_report(y_predict, y_test))
 
 # 7、绘制ROC曲线（最简单版本）
-from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
 
 # 将真实标签转换为numpy数组
 y_true = np.array(y_test)
@@ -62,7 +62,7 @@ for i in range(len(clf.classes_)):
     auc_score = auc(fpr, tpr)
     plt.plot(fpr, tpr, label=f'Class {clf.classes_[i]} (AUC = {auc_score:.3f})')
 
-plt.plot([0, 1], [0, 1], 'k--', label='Random')
+plt.plot([0, 1], [0, 1], 'k--', label='Random Classifier')
 plt.xlabel('误判代价')
 plt.ylabel('识别能力')
 plt.title('KNN算法的ROC曲线')
