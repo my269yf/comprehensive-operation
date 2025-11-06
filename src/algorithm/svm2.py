@@ -50,8 +50,8 @@ print(x_train.shape)  # 比如 (200, 80)
 from sklearn.svm import SVC
 
 #   * 实例化SVM分类器
-#   * kernel='linear' 使用线性核函数，常见还有 'rbf', 'poly'
-clf = SVC(kernel='linear', C=1.0)
+#   * 重要：添加 probability=True 才能获取概率
+clf = SVC(kernel='linear', C=1.0, probability=True, random_state=42)
 clf.fit(x_train, y_train)
 
 #   * 预测
@@ -60,3 +60,50 @@ y_predict = clf.predict(x_test)
 # 5、评估模型
 from sklearn.metrics import classification_report
 print(classification_report(y_predict, y_test))
+
+# ============ 新增的ROC曲线绘制代码 ============
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+import numpy as np
+
+# 获取预测概率（关键步骤）
+y_predict_proba = clf.predict_proba(x_test)
+
+# 将真实标签转换为numpy数组
+y_true = np.array(y_test)
+
+# 绘制ROC曲线
+plt.figure(figsize=(8, 6))
+
+# 为每个类别绘制ROC曲线
+for i in range(len(clf.classes_)):
+    # 计算当前类别的ROC曲线
+    fpr, tpr, _ = roc_curve(y_true == clf.classes_[i], y_predict_proba[:, i])
+    
+    # 计算AUC值
+    auc_score = auc(fpr, tpr)
+    
+    # 绘制曲线
+    plt.plot(fpr, tpr, linewidth=2, 
+             label=f'Class {clf.classes_[i]} (AUC = {auc_score:.3f})')
+
+# 绘制随机分类器参考线
+plt.plot([0, 1], [0, 1], 'k--', linewidth=1, label='Random Classifier')
+
+# 设置图表属性
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('SVM ROC Curves')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+# 显示图表
+plt.tight_layout()
+plt.savefig("roc.svg")
+plt.show()
+
+print("ROC曲线绘制完成！")
+print(f"模型包含 {len(clf.classes_)} 个类别: {clf.classes_}")
