@@ -7,6 +7,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
 import numpy as np
 
+# 设置中文字体
+try:
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False    # 用来正常显示负号
+except:
+    print("注意：中文字体设置可能有问题")
+
 # 1、获取数据
 all_pd_data = pd.read_excel("./data/raw/gastric.xlsx", engine="openpyxl")
 
@@ -56,10 +63,10 @@ for i in range(len(clf.classes_)):
     plt.plot(fpr, tpr, label=f'Class {clf.classes_[i]} (AUC = {auc_score:.3f})')
 
 plt.plot([0, 1], [0, 1], 'k--', label='Random')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('KNN ROC Curves')
+plt.xlabel('误判代价')
+plt.ylabel('识别能力')
+plt.title('KNN算法的ROC曲线')
 plt.legend()
 plt.grid(True)
-plt.savefig("roc.svg")
+plt.savefig("roc-knn.svg")
 plt.show()

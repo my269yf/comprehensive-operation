@@ -102,7 +102,7 @@ plt.grid(True, alpha=0.3)
 
 # 显示图表
 plt.tight_layout()
-plt.savefig("roc.svg")
+plt.savefig("roc-svm.svg")
 plt.show()
 
 print("ROC曲线绘制完成！")
